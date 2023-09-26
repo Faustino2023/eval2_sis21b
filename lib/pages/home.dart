@@ -51,9 +51,11 @@ class _MyHomePageState extends State<MyHomePage> {
               return ListView.builder(
                   itemCount: snapshot.data?.length,
                   itemBuilder: ((context, index) {
-                    return Text(snapshot.data?[index]["carnet"] +
+                    return Text(snapshot.data?[index]["id"] +
                         "-" +
-                        snapshot.data?[index]["nombres"]);
+                        snapshot.data?[index]["nombre"] +
+                        "-" +
+                        snapshot.data?[index]["estado"]);
                   }));
             } else {
               return const Center(
