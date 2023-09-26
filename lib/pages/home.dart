@@ -13,7 +13,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   void getData() async {
     CollectionReference collectionReference =
-        FirebaseFirestore.instance.collection("tbestudiantes");
+        FirebaseFirestore.instance.collection("tb_categoria");
     QuerySnapshot mensajes = await collectionReference.get();
     if (mensajes.docs.length != 0) {
       for (var doc in mensajes.docs) {
@@ -26,7 +26,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List> getMensajes() async {
     List chats = [];
     CollectionReference collectionReference =
-        FirebaseFirestore.instance.collection("tbchat");
+        FirebaseFirestore.instance.collection("tb_categoria");
     QuerySnapshot mensajes = await collectionReference.get();
     if (mensajes.docs.length != 0) {
       for (var doc in mensajes.docs) {
