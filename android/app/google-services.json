@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "581409099263",
+    "project_id": "eval2-21b",
+    "storage_bucket": "eval2-21b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:581409099263:android:5aa2ce82e078c2dc986bca",
+        "android_client_info": {
+          "package_name": "com.andreaitca.eval2_sis21b"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_d1gmAV5RUhsKvy0IjXft0LIDCCVPwqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
