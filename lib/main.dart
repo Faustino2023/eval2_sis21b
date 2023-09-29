@@ -1,109 +1,211 @@
-import 'package:eval2_sis21b/models/crud.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'pages/home.dart';
-//import 'package:one_flutter/models/crud.dart';
-//import 'firebase_options.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() async { 
-  WidgetsFlutterBinding.ensureInitialized(); 
-  await Firebase.initializeApp( 
-   // options:FirebaseOptions.cloud_firestore,
-     ); 
-     runApp(MyApp()); 
-     } 
-     //void main() => runApp(const MyApp()); 
-    class MyApp extends StatelessWidget { 
-      const MyApp({super.key}); 
-      @override 
-      Widget build(BuildContext context) { 
-        return const MaterialApp( 
-          debugShowCheckedModeBanner: false, 
-          title: 'Material App', 
-          home: Home(),
-
-  ); 
- } 
-} class Home extends StatefulWidget { 
-  const Home({ 
-    super.key, 
-    }); 
-    @override State<Home> createState() => _HomeState();
-     } 
-     class _HomeState extends State<Home> { 
-      Null datos; 
-      void _dataFireBase(){ 
-        db.collection("tb_students").where("first_name", isEqualTo: 
-        "Ana").get().then(
-           (querySnapshot) {
-             print("Successfully completed"); 
-             for (var docSnapshot in querySnapshot.docs) { 
-              print('${docSnapshot.id} => ${docSnapshot.data()}'); 
-              } 
-              }, 
-              onError: (e) => print("Error completing: $e"), 
-              ); 
-              } void _dataFireBase1(){ 
-                setState(() { 
-                  //db = FirebaseFirestore.instance;
-     db.collection("tb_categoria").get().then( 
-     (querySnapshot) { 
-      ("Successfully completed"); 
-        for (var docSnapshot in querySnapshot.docs) {
-      //datass = docSnapshot.data(); 
-    print('${docSnapshot.id} => ${docSnapshot.data()}'); 
-    } 
-   }, 
- onError: (e) => print("Error completing: $e"), 
-); 
-}); 
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  Firebase.initializeApp().then((_) {
+    runApp(const MyApp());
+  });
 }
 
-@override
-Widget build(BuildContext context) 
-{ return Scaffold(
-appBar: AppBar( title: const Text('Consulta Cloud Firestore'),
-                        ), 
-body: FutureBuilder( 
-future: getStudiantes(), 
-builder: ((context, snapshot) { 
-return ListView.builder( itemCount: snapshot.data?.length, 
-      itemBuilder: ((context, index) { 
-        //datos = snapshot.data?[index]['first_name'];
-       return Card(
-        elevation: 10,
-        clipBehavior: Clip.hardEdge,
-       shape: const RoundedRectangleBorder(
-        side: BorderSide( 
-        //color: Theme.of(context).colorScheme.outline, 
-        color: Colors.black, 
-         ), borderRadius: BorderRadius.all(Radius.circular(12)),
-         ), child: InkWell(
-     //splashColor: Colors.blue.withAlpha(30),
-     splashColor: Colors.grey, 
-     onTap: () {
-  debugPrint(snapshot.data?[index]['nombre'] + " " +
-   snapshot.data?[index]['apellido']); 
-   }, 
-   child: SizedBox( 
-    width: 300,
-     height: 100, 
-     child: Center(
-       child: Text( 
-        snapshot.data?[index]['first_name'] + " " +
-         snapshot.data?[index]['seconds_name'],
-          style: const TextStyle(
-         fontSize: 20,
-         fontWeight: FontWeight.bold,
-          color: Colors.blue
-           ),
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Conexión a Firebase',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Tabla de Categorías'),
+    );
+  }
+}
+
+class MyForm extends StatelessWidget {
+  final TextEditingController idController = TextEditingController();
+  final ValueNotifier<bool> activoCheckbox = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> inactivoCheckbox = ValueNotifier<bool>(false);
+  final TextEditingController nombreController = TextEditingController();
+
+  void _guardarDatos() {
+    var estado;
+    if (activoCheckbox.value) {
+      estado = 'Activo';
+    } else if (inactivoCheckbox.value) {
+      estado = 'Inactivo';
+    }
+
+    FirebaseFirestore.instance.collection('tb_categoria').add({
+      'id': idController.text,
+      'estado': estado,
+      'nombre': nombreController.text,
+    });
+
+    // Resetear los controladores después de guardar
+    idController.clear();
+    activoCheckbox.value = false;
+    inactivoCheckbox.value = false;
+    nombreController.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.2),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(Icons.perm_identity_rounded),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    controller: idController,
+                    decoration: InputDecoration(labelText: 'ID'),
+                  ),
+                ),
+              ],
             ),
-             ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: activoCheckbox,
+                  builder: (context, value, child) {
+                    return Checkbox(
+                      value: value,
+                      onChanged: (newValue) {
+                        activoCheckbox.value = newValue!;
+                        if (newValue) {
+                          inactivoCheckbox.value = false;
+                        }
+                      },
+                    );
+                  },
+                ),
+                Text('Activo'),
+                ValueListenableBuilder<bool>(
+                  valueListenable: inactivoCheckbox,
+                  builder: (context, value, child) {
+                    return Checkbox(
+                      value: value,
+                      onChanged: (newValue) {
+                        inactivoCheckbox.value = newValue!;
+                        if (newValue) {
+                          activoCheckbox.value = false;
+                        }
+                      },
+                    );
+                  },
+                ),
+                Text('Inactivo'),
+              ],
+            ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.person_2),
+                SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    controller: nombreController,
+                    decoration: InputDecoration(labelText: 'Nombre'),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Container(
+              constraints: BoxConstraints.expand(height: 60),
+              child: ElevatedButton(
+                onPressed: _guardarDatos,
+                child: Text(
+                  'Guardar Datos',
+                  style: TextStyle(fontSize: 24),
+                ),
               ),
-               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  final String title;
+
+  const MyHomePage({Key? key, required this.title}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              MyForm(),
+              SizedBox(height: 20),
+              ListaRegistros(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ListaRegistros extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('tb_categoria').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return CircularProgressIndicator();
+        }
+
+        var registros = snapshot.data!.docs;
+
+        return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: [
+                DataColumn(label: Text('ID')),
+                DataColumn(label: Text('Estado')),
+                DataColumn(label: Text('Nombre')),
+              ],
+              rows: registros.map((registro) {
+                var data = registro.data() as Map<String, dynamic>;
+                return DataRow(
+                  cells: [
+                    DataCell(Text(data['id'])),
+                    DataCell(Text(data['estado'])),
+                    DataCell(Text(data['nombre'])),
+                  ],
                 );
-                }), 
-                ); 
-                }) ),
-                 ); 
-                 } }
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
